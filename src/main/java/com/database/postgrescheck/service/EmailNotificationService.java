@@ -154,4 +154,173 @@ public class EmailNotificationService {
         logger.error("- 启动通知: {}", appConfig.getNotification().isStartupEnabled() ? "已启用" : "已禁用");
         logger.error("=========================");
     }
+    
+    /**
+     * 发送恢复通知邮件
+     * 
+     * @param downtimeMinutes 故障持续时间（分钟）
+     */
+    public void sendRecoveryAlert(long downtimeMinutes) {
+        if (!appConfig.getNotification().isRecoveryEnabled()) {
+            logger.info("恢复通知已禁用，跳过发送");
+            return;
+        }
+
+        // 验证收件人配置
+        String toAddresses = appConfig.getNotification().getTo();
+        if (toAddresses == null || toAddresses.trim().isEmpty()) {
+            logger.error("恢复通知失败：收件人配置为空，请在配置文件中设置 app.notification.to");
+            return;
+        }
+
+        // 验证邮件模板
+        String bodyTemplate = appConfig.getNotification().getRecoveryBodyTemplate();
+        if (bodyTemplate == null || bodyTemplate.trim().isEmpty()) {
+            logger.error("恢复通知失败：邮件内容模板为空，请在配置文件中设置 app.notification.recovery-body-template");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(appConfig.getNotification().getFrom());
+            
+            // 支持多个收件人，用逗号分隔
+            String[] recipients = toAddresses.split(",");
+            message.setTo(recipients);
+            
+            message.setSubject(appConfig.getNotification().getRecoverySubject());
+
+            // 格式化停机时长
+            String downtimeDescription = formatDowntime(downtimeMinutes);
+            
+            // 格式化邮件内容
+            String body = String.format(
+                    bodyTemplate,
+                    LocalDateTime.now().format(FORMATTER),
+                    appConfig.getMonitor().getTableName(),
+                    downtimeDescription,
+                    downtimeMinutes
+            );
+            message.setText(body);
+
+            mailSender.send(message);
+            logger.info("恢复通知邮件已发送至: {}", appConfig.getNotification().getTo());
+        } catch (Exception e) {
+            logger.error("发送恢复通知邮件失败", e);
+        }
+    }
+    
+    /**
+     * 发送每日健康检查邮件
+     */
+    public void sendDailyHealthCheck() {
+        if (!appConfig.getNotification().isDailyHealthCheckEnabled()) {
+            logger.info("每日健康检查通知已禁用，跳过发送");
+            return;
+        }
+
+        // 验证收件人配置
+        String toAddresses = appConfig.getNotification().getTo();
+        if (toAddresses == null || toAddresses.trim().isEmpty()) {
+            logger.error("每日健康检查失败：收件人配置为空，请在配置文件中设置 app.notification.to");
+            return;
+        }
+
+        // 验证邮件模板
+        String bodyTemplate = appConfig.getNotification().getDailyHealthCheckBodyTemplate();
+        if (bodyTemplate == null || bodyTemplate.trim().isEmpty()) {
+            logger.error("每日健康检查失败：邮件内容模板为空，请在配置文件中设置 app.notification.daily-health-check-body-template");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(appConfig.getNotification().getFrom());
+            
+            // 支持多个收件人，用逗号分隔
+            String[] recipients = toAddresses.split(",");
+            message.setTo(recipients);
+            
+            message.setSubject(appConfig.getNotification().getDailyHealthCheckSubject());
+
+            // 格式化邮件内容
+            String body = String.format(
+                    bodyTemplate,
+                    LocalDateTime.now().format(FORMATTER),
+                    appConfig.getMonitor().getTableName(),
+                    appConfig.getMonitor().getTimeWindowMinutes()
+            );
+            message.setText(body);
+
+            mailSender.send(message);
+            logger.info("每日健康检查邮件已发送至: {}", appConfig.getNotification().getTo());
+        } catch (Exception e) {
+            logger.error("发送每日健康检查邮件失败", e);
+        }
+    }
+    
+    /**
+     * 发送关闭通知邮件
+     */
+    public void sendShutdownNotification() {
+        if (!appConfig.getNotification().isShutdownEnabled()) {
+            logger.info("关闭通知已禁用，跳过发送");
+            return;
+        }
+
+        // 验证收件人配置
+        String toAddresses = appConfig.getNotification().getTo();
+        if (toAddresses == null || toAddresses.trim().isEmpty()) {
+            logger.error("关闭通知失败：收件人配置为空，请在配置文件中设置 app.notification.to");
+            return;
+        }
+
+        // 验证邮件模板
+        String bodyTemplate = appConfig.getNotification().getShutdownBodyTemplate();
+        if (bodyTemplate == null || bodyTemplate.trim().isEmpty()) {
+            logger.error("关闭通知失败：邮件内容模板为空，请在配置文件中设置 app.notification.shutdown-body-template");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(appConfig.getNotification().getFrom());
+            
+            // 支持多个收件人，用逗号分隔
+            String[] recipients = toAddresses.split(",");
+            message.setTo(recipients);
+            
+            message.setSubject(appConfig.getNotification().getShutdownSubject());
+
+            // 格式化邮件内容
+            String body = String.format(
+                    bodyTemplate,
+                    LocalDateTime.now().format(FORMATTER),
+                    appConfig.getMonitor().getTableName()
+            );
+            message.setText(body);
+
+            mailSender.send(message);
+            logger.info("关闭通知邮件已发送至: {}", appConfig.getNotification().getTo());
+        } catch (Exception e) {
+            logger.error("发送关闭通知邮件失败", e);
+        }
+    }
+    
+    /**
+     * 格式化停机时长
+     */
+    private String formatDowntime(long minutes) {
+        if (minutes < 60) {
+            return minutes + " 分钟";
+        } else if (minutes < 1440) {
+            long hours = minutes / 60;
+            long mins = minutes % 60;
+            return hours + " 小时 " + mins + " 分钟";
+        } else {
+            long days = minutes / 1440;
+            long hours = (minutes % 1440) / 60;
+            return days + " 天 " + hours + " 小时";
+        }
+    }
 }

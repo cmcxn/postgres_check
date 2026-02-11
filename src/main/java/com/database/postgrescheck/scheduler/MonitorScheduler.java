@@ -2,6 +2,7 @@ package com.database.postgrescheck.scheduler;
 
 import com.database.postgrescheck.config.AppConfig;
 import com.database.postgrescheck.service.DatabaseMonitorService;
+import com.database.postgrescheck.service.EmailNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class MonitorScheduler {
     private DatabaseMonitorService monitorService;
 
     @Autowired
+    private EmailNotificationService emailService;
+
+    @Autowired
     private AppConfig appConfig;
 
     /**
@@ -31,5 +35,16 @@ public class MonitorScheduler {
         logger.info("==================== 开始定时检查 ====================");
         monitorService.checkRecentData();
         logger.info("==================== 检查完成 ====================");
+    }
+    
+    /**
+     * 每日健康检查
+     * 默认每天早上8:00执行，可通过配置文件修改
+     */
+    @Scheduled(cron = "${app.notification.daily-health-check-cron:0 0 8 * * ?}")
+    public void dailyHealthCheck() {
+        logger.info("==================== 开始每日健康检查 ====================");
+        emailService.sendDailyHealthCheck();
+        logger.info("==================== 每日健康检查完成 ====================");
     }
 }
