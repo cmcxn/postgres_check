@@ -63,17 +63,21 @@ app:
   notification:
     from: your_qq@qq.com                       # 发件人（与上面相同）
     to: recipient@example.com                  # 收件人
+    startup-enabled: true                      # 启用启动通知（可选）
 ```
 
 ### 3. 自定义监控参数（可选）
 
-如需修改监控频率和时间窗口：
+如需修改监控频率和时间窗口，或禁用启动通知：
 
 ```yaml
 app:
   monitor:
     cron: "0 */10 * * * ?"     # 改为每10分钟检查一次
     time-window-minutes: 10     # 改为检查最近10分钟
+  
+  notification:
+    startup-enabled: false      # 禁用启动通知（如不需要）
 ```
 
 ## 三、运行应用
@@ -144,6 +148,12 @@ tail -f logs/postgres-check.log
 ```
 
 ### 2. 预期日志输出
+
+**应用启动时：**
+```
+2024-01-01 09:55:00 - 应用启动完成，准备发送启动通知邮件
+2024-01-01 09:55:00 - 启动通知邮件已发送至: recipient@example.com
+```
 
 **正常情况（有新数据）：**
 ```
