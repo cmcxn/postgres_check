@@ -180,12 +180,32 @@ tail -f logs/postgres-check.log
 **错误信息：**
 ```
 发送邮件失败: AuthenticationFailedException
+或
+org.springframework.mail.MailSendException: Mail server connection failed
+Caused by: java.net.SocketTimeoutException: Read timed out
+```
+
+**新功能**：应用现在会自动检测邮件配置并提供详细诊断！
+
+启动时会看到配置验证结果：
+```
+========================================
+开始验证邮件配置...
+✓ SMTP 服务器: smtp.qq.com
+✓ SMTP 端口: 587
+⚠️  SMTP 用户名未配置或使用默认值
+========================================
 ```
 
 **解决方法：**
+- 查看应用启动日志中的配置验证信息
+- 参考详细排查指南：[EMAIL_TROUBLESHOOTING.md](EMAIL_TROUBLESHOOTING.md)
 - 检查邮箱用户名和授权码是否正确
 - 确认已开启 SMTP 服务
-- QQ邮箱必须使用授权码，不能使用登录密码
+- QQ/163 邮箱必须使用授权码，不能使用登录密码
+- 测试网络连接：`telnet smtp.qq.com 587`
+
+**注意**：即使邮件配置有问题，应用也会正常启动，不会被阻止。
 
 ### 2. 数据库连接失败
 
