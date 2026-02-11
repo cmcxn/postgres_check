@@ -1,0 +1,139 @@
+# ==================================================
+# 正确的邮件配置示例（针对 smtp.88.com SSL 465端口）
+# ==================================================
+# 这是针对你的配置修正后的完整示例
+
+spring:
+  application:
+    name: postgres-check
+  
+  # ====== 数据库配置 ======
+  datasource:
+    url: jdbc:postgresql://localhost:5432/your_database
+    username: your_username
+    password: your_password
+    driver-class-name: org.postgresql.Driver
+  
+  # ====== JPA配置 ======
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  
+  # ====== 邮件配置（SSL 465端口）======
+  mail:
+    # SMTP 服务器地址
+    host: smtp.88.com
+    
+    # SMTP 端口（SSL）
+    port: 465
+    
+    # 发件邮箱账号
+    username: chenmins@88.com
+    
+    # 邮箱密码
+    password: xxxxx
+    
+    # 邮件属性配置（SSL方式）
+    properties:
+      mail:
+        smtp:
+          # 启用 SMTP 认证
+          auth: true
+          
+          # SSL 配置
+          ssl:
+            enable: true
+          
+          # Socket Factory 配置
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          
+          # 超时设置
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# ====== 应用自定义配置 ======
+app:
+  # ------ 监控配置 ------
+  monitor:
+    # 检查间隔（cron表达式）
+    cron: "0 */5 * * * ?"
+    
+    # 数据时间窗口（分钟）
+    time-window-minutes: 5
+    
+    # 监控的表名
+    table-name: sync_operation_log
+  
+  # ------ 邮件通知配置 ------
+  notification:
+    # 是否启用邮件通知
+    enabled: true
+    
+    # 发件人邮箱（与 spring.mail.username 保持一致）
+    from: chenmins@88.com
+    
+    # 收件人邮箱（修改为实际收件人）
+    to: recipient@example.com
+    
+    # 数据告警邮件主题
+    subject: "[警告] 数据库监控：sync_operation_log 表无新数据"
+    
+    # 数据告警邮件内容模板
+    body-template: |
+      您好，
+      
+      数据库监控系统检测到 sync_operation_log 表在过去 %d 分钟内没有新增数据。
+      
+      检测时间：%s
+      表名：%s
+      时间窗口：最近 %d 分钟
+      
+      请及时检查数据同步服务是否正常运行。
+      
+      此邮件由系统自动发送，请勿回复。
+    
+    # ------ 启动通知配置 ------
+    # 是否启用启动通知邮件
+    startup-enabled: true
+    
+    # 启动通知邮件主题
+    startup-subject: "[通知] 数据库监控系统已启动"
+    
+    # 启动通知邮件内容模板
+    startup-body-template: |
+      您好，
+      
+      数据库监控系统已成功启动。
+      
+      启动时间：%s
+      监控表名：%s
+      检查频率：每 %d 分钟
+      
+      系统将定时检查数据库中是否有新增数据，如发现异常将及时通知您。
+      
+      此邮件由系统自动发送，请勿回复。
+
+# ====== 日志配置 ======
+logging:
+  level:
+    com.database.postgrescheck: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/postgres-check.log
+    max-size: 10MB
+    max-history: 30
