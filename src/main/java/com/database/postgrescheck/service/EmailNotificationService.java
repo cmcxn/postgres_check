@@ -123,7 +123,35 @@ public class EmailNotificationService {
             mailSender.send(message);
             logger.info("启动通知邮件已发送至: {}", appConfig.getNotification().getTo());
         } catch (Exception e) {
-            logger.error("发送启动通知邮件失败", e);
+            logger.error("发送启动通知邮件失败。请检查以下配置：", e);
+            logEmailConfigurationDiagnostics();
         }
+    }
+
+    /**
+     * 记录邮件配置诊断信息
+     * 帮助用户排查配置问题
+     */
+    private void logEmailConfigurationDiagnostics() {
+        logger.error("=== 邮件配置诊断信息 ===");
+        logger.error("请检查 application.yml 中的以下配置项：");
+        logger.error("1. spring.mail.host - SMTP 服务器地址");
+        logger.error("2. spring.mail.port - SMTP 端口（587/TLS 或 465/SSL）");
+        logger.error("3. spring.mail.username - 发件邮箱账号");
+        logger.error("4. spring.mail.password - 邮箱密码或授权码");
+        logger.error("5. app.notification.from - 发件人地址");
+        logger.error("6. app.notification.to - 收件人地址");
+        logger.error("");
+        logger.error("常见问题：");
+        logger.error("- QQ/163邮箱需要使用授权码，不是登录密码");
+        logger.error("- 检查防火墙是否阻止 SMTP 端口");
+        logger.error("- 确认 SMTP 服务器地址和端口正确");
+        logger.error("- 某些邮箱需要开启 SMTP 服务");
+        logger.error("");
+        logger.error("当前配置摘要：");
+        logger.error("- 发件人: {}", appConfig.getNotification().getFrom());
+        logger.error("- 收件人: {}", appConfig.getNotification().getTo());
+        logger.error("- 启动通知: {}", appConfig.getNotification().isStartupEnabled() ? "已启用" : "已禁用");
+        logger.error("=========================");
     }
 }

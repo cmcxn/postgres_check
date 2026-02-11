@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,11 +22,18 @@ public class StartupNotificationService {
 
     /**
      * 监听应用启动完成事件
-     * 在应用完全启动后发送启动通知邮件
+     * 在应用完全启动后异步发送启动通知邮件
+     * 使用异步方式避免阻塞应用启动
      */
+    @Async
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
         logger.info("应用启动完成，准备发送启动通知邮件");
-        emailService.sendStartupNotification();
+        try {
+            emailService.sendStartupNotification();
+        } catch (Exception e) {
+            logger.error("启动通知邮件发送失败，但不影响应用运行", e);
+        }
     }
 }
+
