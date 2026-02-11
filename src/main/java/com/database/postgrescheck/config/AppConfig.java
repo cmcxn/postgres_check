@@ -71,6 +71,11 @@ public class AppConfig {
         private String to;
         private String subject = "[警告] 数据库监控：sync_operation_log 表无新数据";
         private String bodyTemplate;
+        
+        // 启动通知配置
+        private boolean startupEnabled = true;
+        private String startupSubject = "[通知] 数据库监控系统已启动";
+        private String startupBodyTemplate;
 
         public boolean isEnabled() {
             return enabled;
@@ -110,6 +115,30 @@ public class AppConfig {
 
         public void setBodyTemplate(String bodyTemplate) {
             this.bodyTemplate = bodyTemplate;
+        }
+
+        public boolean isStartupEnabled() {
+            return startupEnabled;
+        }
+
+        public void setStartupEnabled(boolean startupEnabled) {
+            this.startupEnabled = startupEnabled;
+        }
+
+        public String getStartupSubject() {
+            return startupSubject;
+        }
+
+        public void setStartupSubject(String startupSubject) {
+            this.startupSubject = startupSubject;
+        }
+
+        public String getStartupBodyTemplate() {
+            return startupBodyTemplate;
+        }
+
+        public void setStartupBodyTemplate(String startupBodyTemplate) {
+            this.startupBodyTemplate = startupBodyTemplate;
         }
     }
 }

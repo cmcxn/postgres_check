@@ -77,4 +77,53 @@ public class EmailNotificationService {
             logger.error("发送邮件失败", e);
         }
     }
+
+    /**
+     * 发送启动通知邮件
+     */
+    public void sendStartupNotification() {
+        if (!appConfig.getNotification().isStartupEnabled()) {
+            logger.info("启动通知已禁用，跳过发送");
+            return;
+        }
+
+        // 验证收件人配置
+        String toAddresses = appConfig.getNotification().getTo();
+        if (toAddresses == null || toAddresses.trim().isEmpty()) {
+            logger.error("启动通知失败：收件人配置为空，请在配置文件中设置 app.notification.to");
+            return;
+        }
+
+        // 验证邮件模板
+        String bodyTemplate = appConfig.getNotification().getStartupBodyTemplate();
+        if (bodyTemplate == null || bodyTemplate.trim().isEmpty()) {
+            logger.error("启动通知失败：邮件内容模板为空，请在配置文件中设置 app.notification.startup-body-template");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(appConfig.getNotification().getFrom());
+            
+            // 支持多个收件人，用逗号分隔
+            String[] recipients = toAddresses.split(",");
+            message.setTo(recipients);
+            
+            message.setSubject(appConfig.getNotification().getStartupSubject());
+
+            // 格式化邮件内容
+            String body = String.format(
+                    bodyTemplate,
+                    LocalDateTime.now().format(FORMATTER),
+                    appConfig.getMonitor().getTableName(),
+                    appConfig.getMonitor().getTimeWindowMinutes()
+            );
+            message.setText(body);
+
+            mailSender.send(message);
+            logger.info("启动通知邮件已发送至: {}", appConfig.getNotification().getTo());
+        } catch (Exception e) {
+            logger.error("发送启动通知邮件失败", e);
+        }
+    }
 }
