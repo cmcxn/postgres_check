@@ -37,19 +37,33 @@ public class EmailNotificationService {
             return;
         }
 
+        // 验证收件人配置
+        String toAddresses = appConfig.getNotification().getTo();
+        if (toAddresses == null || toAddresses.trim().isEmpty()) {
+            logger.error("邮件通知失败：收件人配置为空，请在配置文件中设置 app.notification.to");
+            return;
+        }
+
+        // 验证邮件模板
+        String bodyTemplate = appConfig.getNotification().getBodyTemplate();
+        if (bodyTemplate == null || bodyTemplate.trim().isEmpty()) {
+            logger.error("邮件通知失败：邮件内容模板为空，请在配置文件中设置 app.notification.body-template");
+            return;
+        }
+
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(appConfig.getNotification().getFrom());
             
             // 支持多个收件人，用逗号分隔
-            String[] recipients = appConfig.getNotification().getTo().split(",");
+            String[] recipients = toAddresses.split(",");
             message.setTo(recipients);
             
             message.setSubject(appConfig.getNotification().getSubject());
 
             // 格式化邮件内容
             String body = String.format(
-                    appConfig.getNotification().getBodyTemplate(),
+                    bodyTemplate,
                     timeWindowMinutes,
                     LocalDateTime.now().format(FORMATTER),
                     appConfig.getMonitor().getTableName(),

@@ -49,7 +49,14 @@ CREATE TABLE "public"."sync_operation_log" (
 
 ### 3. 配置应用
 
-编辑 `src/main/resources/application.yml` 文件，配置以下参数：
+**重要：首先需要从模板创建配置文件**
+
+```bash
+# 复制配置模板
+cp src/main/resources/application.yml.template src/main/resources/application.yml
+```
+
+然后编辑 `src/main/resources/application.yml` 文件，配置以下参数：
 
 #### 数据库配置
 

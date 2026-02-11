@@ -38,7 +38,13 @@ mvn -version
 
 ### 2. 配置数据库和邮件
 
-编辑 `src/main/resources/application.yml` 文件：
+**首先从模板创建配置文件：**
+
+```bash
+cp src/main/resources/application.yml.template src/main/resources/application.yml
+```
+
+然后编辑 `src/main/resources/application.yml` 文件：
 
 ```yaml
 spring:
