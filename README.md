@@ -11,6 +11,7 @@
 - ✅ **每日健康检查邮件（NEW）** - 每天定时确认系统运行正常
 - ✅ **应用关闭时发送通知（NEW）** - 防止监控服务静默失败
 - ✅ 系统启动时发送通知邮件
+- ✅ **支持多人接收和抄送（CC）** - 支持多个收件人和抄送人
 - ✅ 支持 SMTP 邮件服务
 - ✅ 灵活的配置文件，所有参数可自定义
 - ✅ 详细的日志记录
@@ -103,6 +104,7 @@ app:
     enabled: true                              # 是否启用邮件通知
     from: your_email@example.com               # 发件人
     to: recipient@example.com                  # 收件人（多个用逗号分隔）
+    cc:                                        # 抄送人（可选，多个用逗号分隔）
     subject: "[警告] 数据库监控：sync_operation_log 表无新数据"
     
     # 启动通知配置
@@ -209,7 +211,19 @@ app:
 - 检查防火墙是否阻止了 SMTP 端口
 - 使用 `telnet smtp.qq.com 587` 测试连接
 
-### 2. 数据库连接失败
+### 2. 如何配置多人接收和抄送
+
+系统支持多个收件人和抄送人，详细说明请查看：[MULTI_RECIPIENT_CC.md](MULTI_RECIPIENT_CC.md)
+
+**快速配置**：
+```yaml
+app:
+  notification:
+    to: admin1@example.com,admin2@example.com     # 多个收件人
+    cc: supervisor@example.com,manager@example.com # 多个抄送人（可选）
+```
+
+### 3. 数据库连接失败
 
 - 检查数据库地址、端口、用户名、密码是否正确
 - 确认 PostgreSQL 服务是否正在运行
