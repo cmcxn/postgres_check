@@ -69,6 +69,7 @@ public class AppConfig {
         private boolean enabled = true;
         private String from;
         private String to;
+        private String cc;  // 抄送人邮箱，多个用逗号分隔
         private String subject = "[警告] 数据库监控：sync_operation_log 表无新数据";
         private String bodyTemplate;
         
@@ -115,6 +116,14 @@ public class AppConfig {
 
         public void setTo(String to) {
             this.to = to;
+        }
+
+        public String getCc() {
+            return cc;
+        }
+
+        public void setCc(String cc) {
+            this.cc = cc;
         }
 
         public String getSubject() {

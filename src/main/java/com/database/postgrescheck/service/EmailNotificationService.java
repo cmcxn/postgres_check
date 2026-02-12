@@ -59,6 +59,9 @@ public class EmailNotificationService {
             String[] recipients = toAddresses.split(",");
             message.setTo(recipients);
             
+            // 设置抄送人
+            setCcIfConfigured(message);
+            
             message.setSubject(appConfig.getNotification().getSubject());
 
             // 格式化邮件内容
@@ -108,6 +111,9 @@ public class EmailNotificationService {
             // 支持多个收件人，用逗号分隔
             String[] recipients = toAddresses.split(",");
             message.setTo(recipients);
+            
+            // 设置抄送人
+            setCcIfConfigured(message);
             
             message.setSubject(appConfig.getNotification().getStartupSubject());
 
@@ -188,6 +194,9 @@ public class EmailNotificationService {
             String[] recipients = toAddresses.split(",");
             message.setTo(recipients);
             
+            // 设置抄送人
+            setCcIfConfigured(message);
+            
             message.setSubject(appConfig.getNotification().getRecoverySubject());
 
             // 格式化停机时长
@@ -241,6 +250,9 @@ public class EmailNotificationService {
             String[] recipients = toAddresses.split(",");
             message.setTo(recipients);
             
+            // 设置抄送人
+            setCcIfConfigured(message);
+            
             message.setSubject(appConfig.getNotification().getDailyHealthCheckSubject());
 
             // 格式化邮件内容
@@ -290,6 +302,9 @@ public class EmailNotificationService {
             String[] recipients = toAddresses.split(",");
             message.setTo(recipients);
             
+            // 设置抄送人
+            setCcIfConfigured(message);
+            
             message.setSubject(appConfig.getNotification().getShutdownSubject());
 
             // 格式化邮件内容
@@ -321,6 +336,26 @@ public class EmailNotificationService {
             long days = minutes / 1440;
             long hours = (minutes % 1440) / 60;
             return days + " 天 " + hours + " 小时";
+        }
+    }
+    
+    /**
+     * 设置抄送人（CC）
+     * 如果配置了抄送人，则添加到邮件中
+     * 
+     * @param message 邮件消息对象
+     */
+    private void setCcIfConfigured(SimpleMailMessage message) {
+        String ccAddresses = appConfig.getNotification().getCc();
+        if (ccAddresses != null && !ccAddresses.trim().isEmpty()) {
+            // 支持多个抄送人，用逗号分隔
+            String[] ccRecipients = ccAddresses.split(",");
+            // 去除每个地址的首尾空格
+            for (int i = 0; i < ccRecipients.length; i++) {
+                ccRecipients[i] = ccRecipients[i].trim();
+            }
+            message.setCc(ccRecipients);
+            logger.debug("已添加抄送人: {}", ccAddresses);
         }
     }
 }

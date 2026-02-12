@@ -103,6 +103,11 @@ app:
     # 多个收件人用英文逗号分隔，例如：email1@example.com,email2@example.com
     to: recipient@example.com
     
+    # 抄送人邮箱（可选）
+    # 多个抄送人用英文逗号分隔，例如：cc1@example.com,cc2@example.com
+    # 如不需要抄送，可以留空或删除此配置
+    cc:
+    
     # 邮件主题
     subject: "[警告] 数据库监控：sync_operation_log 表无新数据"
     
