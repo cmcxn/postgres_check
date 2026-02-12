@@ -1,0 +1,247 @@
+# ====================================================
+# PostgreSQL 数据库监控工具配置文件模板
+# ====================================================
+# 复制此文件为 application.yml，并修改以下配置项
+
+spring:
+  application:
+    name: postgres-check
+  
+  # ====== 数据库配置 ======
+  datasource:
+    # PostgreSQL 数据库连接 URL
+    # 格式：jdbc:postgresql://主机地址:端口/数据库名
+    url: jdbc:postgresql://localhost:5432/your_database
+    
+    # 数据库用户名
+    username: your_username
+    
+    # 数据库密码
+    password: your_password
+    
+    driver-class-name: org.postgresql.Driver
+  
+  # ====== JPA配置 ======
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  
+  # ====== 邮件配置 ======
+  mail:
+    # SMTP 服务器地址
+    # 常用服务器：
+    # - QQ邮箱: smtp.qq.com
+    # - Gmail: smtp.gmail.com
+    # - 163邮箱: smtp.163.com
+    host: smtp.example.com
+    
+    # SMTP 端口
+    # 常用端口：
+    # - 587 (TLS)
+    # - 465 (SSL)
+    # - 25 (不加密，不推荐)
+    port: 587
+    
+    # 发件邮箱账号
+    username: your_email@example.com
+    
+    # 邮箱密码或授权码
+    # 注意：某些邮箱服务需要使用授权码而不是登录密码
+    # - QQ邮箱: 需要在邮箱设置中生成授权码
+    # - Gmail: 需要开启"不太安全的应用"访问或使用应用专用密码
+    password: your_email_password
+    
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# ====== 应用自定义配置 ======
+app:
+  # ------ 监控配置 ------
+  monitor:
+    # 检查间隔（cron表达式）
+    # 格式：秒 分 时 日 月 星期
+    # 示例：
+    # - "0 */5 * * * ?"  每5分钟执行一次
+    # - "0 */10 * * * ?" 每10分钟执行一次
+    # - "0 0 * * * ?"    每小时执行一次
+    # - "0 0 0 * * ?"    每天0点执行一次
+    cron: "0 */5 * * * ?"
+    
+    # 数据时间窗口（分钟）
+    # 检查最近N分钟内是否有新数据
+    time-window-minutes: 5
+    
+    # 监控的表名
+    table-name: sync_operation_log
+  
+  # ------ 邮件通知配置 ------
+  notification:
+    # 是否启用邮件通知
+    # true: 启用, false: 禁用（仅记录日志）
+    enabled: true
+    
+    # 发件人邮箱
+    # 通常与 spring.mail.username 相同
+    from: your_email@example.com
+    
+    # 收件人邮箱
+    # 多个收件人用英文逗号分隔，例如：email1@example.com,email2@example.com
+    to: recipient@example.com
+    
+    # 抄送人邮箱（可选）
+    # 多个抄送人用英文逗号分隔，例如：cc1@example.com,cc2@example.com
+    # 如不需要抄送，可以留空或删除此配置
+    cc:
+    
+    # 邮件主题
+    subject: "[警告] 数据库监控：sync_operation_log 表无新数据"
+    
+    # 邮件内容模板
+    # 占位符说明：
+    # - %d: 数字（时间窗口分钟数）
+    # - %s: 字符串（时间、表名等）
+    body-template: |
+      您好，
+      
+      数据库监控系统检测到 sync_operation_log 表在过去 %d 分钟内没有新增数据。
+      
+      检测时间：%s
+      表名：%s
+      时间窗口：最近 %d 分钟
+      
+      请及时检查数据同步服务是否正常运行。
+      
+      此邮件由系统自动发送，请勿回复。
+    
+    # ------ 启动通知配置 ------
+    # 是否启用启动通知邮件
+    # true: 启用（系统启动时发送通知）, false: 禁用
+    startup-enabled: true
+    
+    # 启动通知邮件主题
+    startup-subject: "[通知] 数据库监控系统已启动"
+    
+    # 启动通知邮件内容模板
+    # 占位符说明：
+    # - %s: 字符串（启动时间、表名等）
+    # - %d: 数字（时间窗口分钟数）
+    startup-body-template: |
+      您好，
+      
+      数据库监控系统已成功启动。
+      
+      启动时间：%s
+      监控表名：%s
+      检查频率：每 %d 分钟
+      
+      系统将定时检查数据库中是否有新增数据，如发现异常将及时通知您。
+      
+      此邮件由系统自动发送，请勿回复。
+    
+    # ------ 恢复通知配置 ------
+    # 是否启用恢复通知邮件
+    # true: 启用（数据恢复时发送通知）, false: 禁用
+    recovery-enabled: true
+    
+    # 恢复通知邮件主题
+    recovery-subject: "[恢复] 数据库监控：数据恢复正常"
+    
+    # 恢复通知邮件内容模板
+    # 占位符说明：
+    # - %s: 字符串（恢复时间、表名、故障时长描述）
+    # - %d: 数字（故障分钟数）
+    recovery-body-template: |
+      您好，
+      
+      数据库监控系统检测到数据已恢复正常。
+      
+      恢复时间：%s
+      监控表名：%s
+      故障时长：%s
+      故障分钟数：%d 分钟
+      
+      系统将继续监控数据变化。
+      
+      此邮件由系统自动发送，请勿回复。
+    
+    # ------ 每日健康检查配置 ------
+    # 是否启用每日健康检查邮件
+    # true: 启用（每天定时发送健康报告）, false: 禁用
+    daily-health-check-enabled: true
+    
+    # 每日健康检查执行时间（cron表达式）
+    # 默认：每天早上8:00
+    daily-health-check-cron: "0 0 8 * * ?"
+    
+    # 每日健康检查邮件主题
+    daily-health-check-subject: "[正常] 数据库监控系统运行正常"
+    
+    # 每日健康检查邮件内容模板
+    # 占位符说明：
+    # - %s: 字符串（检查时间、表名等）
+    # - %d: 数字（时间窗口分钟数）
+    daily-health-check-body-template: |
+      您好，
+      
+      这是每日健康检查报告。数据库监控系统运行正常。
+      
+      检查时间：%s
+      监控表名：%s
+      检查频率：每 %d 分钟
+      
+      系统正在持续监控数据变化，如有异常将及时通知您。
+      
+      此邮件由系统自动发送，请勿回复。
+    
+    # ------ 关闭通知配置 ------
+    # 是否启用关闭通知邮件
+    # true: 启用（系统关闭时发送通知）, false: 禁用
+    shutdown-enabled: true
+    
+    # 关闭通知邮件主题
+    shutdown-subject: "[通知] 数据库监控系统已关闭"
+    
+    # 关闭通知邮件内容模板
+    # 占位符说明：
+    # - %s: 字符串（关闭时间、表名等）
+    shutdown-body-template: |
+      您好，
+      
+      数据库监控系统已关闭。
+      
+      关闭时间：%s
+      监控表名：%s
+      
+      如果这是意外关闭，请立即检查系统状态。
+      监控服务已停止，将不再发送告警邮件。
+      
+      此邮件由系统自动发送，请勿回复。
+
+# ====== 日志配置 ======
+logging:
+  level:
+    com.database.postgrescheck: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/postgres-check.log
+    max-size: 10MB
+    max-history: 30
